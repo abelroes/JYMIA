@@ -27,8 +27,10 @@ adult2 <- subset(adult2, adult2$sex != "?")
 adult2 <- subset(adult2, adult2$capital.gain != "?")
 adult2 <- subset(adult2, adult2$capital.loss != "?")
 adult2 <- subset(adult2, adult2$hours.per.week != "?")
+adult2 <- subset(adult2, adult2$hours.per.week != " ?")
 adult2 <- subset(adult2, adult2$country != "?")
 adult2 <- subset(adult2, adult2$income != "?")
+
 
 #View(adult2)
 write.csv(adult2, file = "../JYMIA/adult2.csv", row.names = FALSE)
@@ -44,7 +46,7 @@ adult2$cat.age[adult2$age >= 75 & adult2$age <= 90] = "75-90"
 table(adult2$cat.age)
 
 #Discretização capital-gain
-varDiv <- (max(adult2$capital.gain) - min(adult2$capital.gain))/5
+varDiv <- ceiling((max(adult2$capital.gain) - min(adult2$capital.gain))/5)
 adult2$cat.capital.gain[adult2$capital.gain >= 0 & adult2$capital.gain < varDiv] = "Very Low"
 adult2$cat.capital.gain[adult2$capital.gain >= varDiv & adult2$capital.gain < (varDiv*2)] = "Low"
 adult2$cat.capital.gain[adult2$capital.gain >= (varDiv*2) & adult2$capital.gain < (varDiv*3)] = "Medium"
@@ -53,7 +55,7 @@ adult2$cat.capital.gain[adult2$capital.gain >= (varDiv*4) & adult2$capital.gain 
 table(adult2$cat.capital.gain)
 
 #Discretização capital-loss
-varDiv <- (max(adult2$capital.loss) - min(adult2$capital.loss))/5
+varDiv <- ceiling((max(adult2$capital.loss) - min(adult2$capital.loss))/5)
 adult2$cat.capital.loss[adult2$capital.loss >= 0 & adult2$capital.loss < varDiv] = "Very Low"
 adult2$cat.capital.loss[adult2$capital.loss >= varDiv & adult2$capital.loss < (varDiv*2)] = "Low"
 adult2$cat.capital.loss[adult2$capital.loss >= (varDiv*2) & adult2$capital.loss < (varDiv*3)] = "Medium"
@@ -62,7 +64,7 @@ adult2$cat.capital.loss[adult2$capital.loss >= (varDiv*4) & adult2$capital.loss 
 table(adult2$cat.capital.loss)
 
 #Discretização hours-per-week
-varDiv <- (max(adult2$hours.per.week) - min(adult2$hours.per.week))/5
+varDiv <- ceiling((max(adult2$hours.per.week) - min(adult2$hours.per.week))/5)
 adult2$cat.hours.per.week[adult2$hours.per.week >= 0 & adult2$hours.per.week < varDiv] = "Very Low"
 adult2$cat.hours.per.week[adult2$hours.per.week >= varDiv & adult2$hours.per.week < (varDiv*2)] = "Low"
 adult2$cat.hours.per.week[adult2$hours.per.week >= (varDiv*2) & adult2$hours.per.week < (varDiv*3)] = "Medium"
