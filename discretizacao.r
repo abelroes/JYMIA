@@ -27,7 +27,6 @@ adult2 <- subset(adult2, adult2$sex != "?")
 adult2 <- subset(adult2, adult2$capital.gain != "?")
 adult2 <- subset(adult2, adult2$capital.loss != "?")
 adult2 <- subset(adult2, adult2$hours.per.week != "?")
-adult2 <- subset(adult2, adult2$hours.per.week != " ?")
 adult2 <- subset(adult2, adult2$country != "?")
 adult2 <- subset(adult2, adult2$income != "?")
 
