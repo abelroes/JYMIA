@@ -12,9 +12,6 @@ write.csv(adult2, file = "../JYMIA/adult2.csv", row.names = FALSE)
 adult2[["education.num"]]=NULL
 adult2[["fnlwgt"]]=NULL
 
-#View(adult2)
-
-
 #Sanitização dos Dados
 adult2 <- subset(adult2, adult2$age != "?")
 adult2 <- subset(adult2, adult2$type.employer != "?")
@@ -30,8 +27,6 @@ adult2 <- subset(adult2, adult2$hours.per.week != "?")
 adult2 <- subset(adult2, adult2$country != "?")
 adult2 <- subset(adult2, adult2$income != "?")
 
-
-#View(adult2)
 write.csv(adult2, file = "../JYMIA/adult2.csv", row.names = FALSE)
 
 
@@ -72,7 +67,6 @@ adult2$cat.hours.per.week[adult2$hours.per.week >= (varDiv*4) & adult2$hours.per
 table(adult2$cat.hours.per.week)
 
 #Descarta colunas não categóricas
-#View(adult2)
 names(adult2)
 adult2[["age"]]=NULL
 adult2[["capital.gain"]]=NULL
