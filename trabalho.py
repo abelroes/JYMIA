@@ -1,14 +1,16 @@
 import pandas as pd
 import math
+import numpy as np
+from sklearn.model_selection import KFold
 
 #def imprimi_arvore(no):
     
 
 def entropia(ppos, pneg):
-    #se as distribuições de positivo e negativo forem iguais, a entropia é 1 (indecisão total)
+    #se as distribuicoes de positivo e negativo forem iguais, a entropia e 1 (indecisao total)
     if ppos == pneg:
         return 1
-    #se todas as observações forem positivas (ppos == 1) ou negativas (ppos == 1), a entropia é 0
+    #se todas as observacoes forem positivas (ppos == 1) ou negativas (ppos == 1), a entropia e 0
     elif ppos == 1 or pneg == 1:
         return 0
     else:
@@ -36,12 +38,10 @@ def ganho_atributo(df, coluna):
 
 def get_melhor_ganho(df, entropia_conjunto, tamanho_conjunto):
     
-    # dicionário com as classes e seus ganhos de informação
+    # dicionario com as classes e seus ganhos de informacao
     ganhos = {}
-    
-    # para cada coluna do dataset, calcular o ganho de informação
+    # para cada coluna do dataset, calcular o ganho de informacao
     for coluna in df.columns:
-
         ganho = entropia_conjunto          
         
         if coluna != coluna_resposta:
@@ -62,45 +62,47 @@ class No():
     
     def __init__(self, df):
         
-        # tamanho do conjunto desse nó
+        # tamanho do conjunto desse no
         self.tamanho_conjunto = len(df)
         #print("Tamanho do conjunto:", self.tamanho_conjunto)
         
-        # proporção de observações positivas
+        # proporcao de observacoes positivas
         self.ppos_conjunto = len(df[df[coluna_resposta] == resp_pos])/self.tamanho_conjunto
         #print("ppos_conjunto:", self.ppos_conjunto)
         
-        # proporção de observações negativas
+        # proporcao de observacoes negativas
         self.pneg_conjunto = len(df[df[coluna_resposta] == resp_neg])/self.tamanho_conjunto      
         #print("pneg_conjunto", self.pneg_conjunto)
         
         
-        # se todas as observações forem positivas, o nó é uma folha de resposta positiva, e a expansão para
+        # se todas as observacoes forem positivas, o no e uma folha de resposta positiva, e a expansao para
         if self.ppos_conjunto == 1:
             self.valor = resp_pos
             print("\t", self.valor)
-        # se todas as observações forem negativas, o nó é uma folha de resposta negativa, e a expansão para
+        # se todas as observacoes forem negativas, o no e uma folha de resposta negativa, e a expansao para
         elif self.pneg_conjunto == 1:
             self.valor = resp_neg
             print("\t", self.valor)
-        # se não houverem mais colunas, o nó é uma folha cujo valor é a resposta mais comum do conjunto pai
+        # se nao houverem mais colunas, o no e uma folha cujo valor e a resposta mais comum do conjunto pai
         elif len(df.columns) == 0:
             self.valor = resp_pos if self.ppos_conjunto > self.pneg_conjunto else resp_neg
         
-        # senão, expandir a árvore
+        # senao, expandir a arvore
         else:
             
             # Atributo que melhor classifica o conjunto (df)
             self.valor = get_melhor_ganho(df, entropia(self.ppos_conjunto, self.pneg_conjunto),
                                           self.tamanho_conjunto)
             print("\nAtributo:", self.valor)
-            # instanciar uma lista que conterá os filhos do nó atual
+            # instanciar uma lista que contera os filhos do no atual
             self.filhos = []
+            self.classes = []
             
-            # Para cada classe do melhor atributo crie um nó filho que receba as observações do atributo = classe:
+            # Para cada classe do melhor atributo crie um no filho que receba as observacoes do atributo = classe:
             for classe in list(set(df[self.valor])):
                 print("\tClasse:", classe)
                 self.filhos.append(No(df[df[self.valor] == classe]))
+                self.classes.append(classe)
 
 
 def discretizar(df):
@@ -117,19 +119,144 @@ def discretizar(df):
         i += 592
     print(i)
     #print(coluna_ordenada.value_counts().sort_values())
+
+
+# Cria um DF para poder enviar ao No e criar a arvore
+# "cat.age","type.employer","education","marital","occupation","relationship","race","sex","country","cat.capital.gain","cat.capital.loss","cat.hours.per.week","income"
+
+
+def criaDF(folds):
+    age = []
+    employer = []
+    education = []
+    marital = []
+    occupation = []
+    relationship = []
+    race = []
+    sex = []
+    country = []
+    gain = []
+    loss = []
+    hoursperweek = []
+    income = []
+    for X in folds:
+        
+        age.append(linhas[X][0])
+        employer.append(linhas[X][1])
+        education.append(linhas[X][2])
+        marital.append(linhas[X][3])
+        occupation.append(linhas[X][4])
+        relationship.append(linhas[X][5])
+        race.append(linhas[X][6])
+        sex.append(linhas[X][7])
+        country.append(linhas[X][8])
+        gain.append(linhas[X][9])
+        loss.append(linhas[X][10])
+        hoursperweek.append(linhas[X][11])
+        income.append(linhas[X][12])
+
+    raw_data = {}
+    raw_data['cat.age'] = age
+    raw_data['type.employer'] = employer
+    raw_data['education'] = education
+    raw_data['marital'] = marital
+    raw_data['occupation'] = occupation
+    raw_data['relationship'] = relationship
+    raw_data['race'] = race
+    raw_data['sex'] = sex
+    raw_data['country'] = country
+    raw_data['cat.capital.gain'] = gain
+    raw_data['cat.capital.loss'] = loss
+    raw_data['cat.hours.per.week'] = hoursperweek
+    raw_data['income'] = income
+
+    trainDf = pd.DataFrame(raw_data, columns = ["cat.age","type.employer","education","marital","occupation","relationship",
+                                                "race","sex","country","cat.capital.gain","cat.capital.loss","cat.hours.per.week","income"])
+    return trainDf
+
+def classificaNaArvore(testDf, raiz, exemploValidacao):
+    noAtual = raiz
+    while noAtual:
+    #Acha atributo
+        atributo = testDf[noAtual.valor][exemploValidacao]
+        #Acha filho
+        proxFilho = 0
+        for i in range (0, len(noAtual.filhos)):
+            if(noAtual.classes[i] == atributo):
+                proxFilho = i
+                break
+        if any(resp in noAtual.filhos[proxFilho].valor for resp in (resp_pos, resp_neg)):
+            return noAtual.filhos[proxFilho].valor
+        else:
+            noAtual = noAtual.filhos[proxFilho]
+
+    
     
 ############ MAIN
 
 print("Passo1:")
-df = pd.read_csv(".\PlayTennisDataSet.csv", delimiter=",")
-df = df[["Outlook", "Temperature", "Humidity", "Wind", "PlayTennis"]]
+df = pd.read_csv("adult2.csv", delimiter=",")
 
-coluna_resposta = "PlayTennis"
-resp_pos = "Yes"
-resp_neg = "No"
+df = df[["cat.age","type.employer","education","marital","occupation","relationship",
+         "race","sex","country","cat.capital.gain","cat.capital.loss","cat.hours.per.week","income"]]
+############K-FOLD###################
 
-# Constrói a árvore
-raiz = No(df)
+linhas = []
+acertou = 0
+errou = 0
+lines = 0 
+while lines < len(df):
+    linha = []
+    for columns in df:
+        linha.append(df[columns][lines])
+    linhas.append(linha)
+    lines = lines + 1 
+
+kf = KFold(n_splits=10)
+for train, test in kf.split(linhas):
+    # Como quebramos o df em um array para fazermos os k-folds, fazemos o processo inverso agr para criando um df a partir de um array
+    trainDf = criaDF(train)
+    testDf = criaDF(test)
+    print "Dados de Treinamento: \n", trainDf
+    # print "Dados de Validacao: \n", testDf
+    coluna_resposta = "income"
+    resp_pos = " <=50K"
+    resp_neg = " >50K"
+    # Constroi a arvore
+    raiz = No(trainDf)
+
+    for exemploValidacao in range(0, len(testDf)):
+        classificacaoNaArvore = classificaNaArvore(testDf, raiz, exemploValidacao)
+        if(classificacaoNaArvore == testDf[coluna_resposta][exemploValidacao]):
+            acertou += 1
+            print "************************************"
+            print "Acertou o//"
+            print "************************************"
+        else:
+            errou += 1
+            print "************************************"
+            print "Errou =("         
+            print "************************************"
+print "Total de acertos: ", acertou
+print "Total de erros: ", errou
+
+n = acertou + errou
+mediaErros = float(errou) / float(n)
+print "Media de erros no modelo: ", mediaErros
+
+SE = math.sqrt((mediaErros*(1-mediaErros))/n)
+print "SE: ", SE
+
+intervaloConfiancaInferior = (mediaErros - (1.96*SE))
+print "Intervalo de confianca Inferior: ", intervaloConfiancaInferior
+intervaloConfiancaSuperior = (mediaErros + (1.96*SE))
+print "Intervalo de confianca Superior: ",intervaloConfiancaSuperior
+
+    
+
+#######################################
+
+
 
 print("Passo 2:")
 header = ["age", "workclass", "fnlwgt", "education", "education-num", "marital-status", "occupation", "relationship", "race", "sex", "capital-gain", "capital-loss", "hours-per-week", "native-country", "income"]
@@ -148,7 +275,7 @@ for i in range(1,32560):
     if 32560%i == 0 and i >= 500 and i <= 1001:
         print(i)
         
-# dividir 32560 por 592, gerará 55 repartições
+# dividir 32560 por 592, gerara 55 reparticoes
 #discretizar(df, "fnlwgt")
 #discretizar(df, "education-num")
 #discretizar(df, "capital-gain")
