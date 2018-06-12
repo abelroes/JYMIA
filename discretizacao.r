@@ -75,7 +75,7 @@ adult2[["hours.per.week"]]=NULL
 
 names(adult2)
 adult2$income.new[adult2$income == "<=50K"] = "menor ou igual a 50K"
-adult2$income.new[adult2$income == ">50K"] = "maior 50K"
+adult2$income.new[adult2$income == ">50K"] = "maior que 50K"
 
 
 #Reordena colunas
