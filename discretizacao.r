@@ -73,8 +73,13 @@ adult2[["capital.gain"]]=NULL
 adult2[["capital.loss"]]=NULL
 adult2[["hours.per.week"]]=NULL
 
+names(adult2)
+adult2$income.new[adult2$income == "<=50K"] = "menor ou igual a 50K"
+adult2$income.new[adult2$income == ">50K"] = "maior 50K"
+
+
 #Reordena colunas
-adult2 <- adult2[, c(10, 1:8, 11:13, 9)]
+adult2 <- adult2[, c(10, 1:8, 11:13, 9, 14)]
 names(adult2)
 #Grava arquivo final
 write.csv(adult2, file = "../JYMIA/adult2.csv", row.names = FALSE)
